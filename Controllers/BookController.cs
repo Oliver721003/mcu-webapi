@@ -7,11 +7,17 @@ namespace WebApiDemo.Controllers;
 [Route("books")]
 public class BookController : ControllerBase
 {
+	private readonly BookContext _context;
+
+	public BookController(BookContext context)
+	{
+		_context = context;
+	}
+
 	[HttpGet]
 	public IEnumerable<Book> Get(string? name = "")
 	{
-		var db = new BookContext();
-		var books = db.Books.AsQueryable();
+		var books = _context.Books.AsQueryable();
 		if (!string.IsNullOrEmpty(name))
 			books = books.Where(x => x.Name.Contains(name));
 		return books.ToList();
@@ -21,25 +27,22 @@ public class BookController : ControllerBase
 	[Route("{id}")]
 	public Book Get(int id)
 	{
-		var db = new BookContext();
-		return db.Books.Find(id);
+		return _context.Books.Find(id);
 	}
 
 	[HttpPost]
 	public IActionResult Insert([FromBody] Book book)
 	{
-		var db = new BookContext();
-		db.Add(book);
-		db.SaveChanges();
+		_context.Add(book);
+		_context.SaveChanges();
 		return Ok();
 	}
 
 	[HttpPut]
 	public IActionResult Update([FromBody] Book book)
 	{
-		var db = new BookContext();
-		db.Update(book);
-		db.SaveChanges();
+		_context.Update(book);
+		_context.SaveChanges();
 		return Ok();
 	}
 
@@ -47,9 +50,8 @@ public class BookController : ControllerBase
 	[Route("{id}")]
 	public IActionResult Delete([FromRoute] int id)
 	{
-		var db = new BookContext();
-		db.Remove(new Book { Id = id });
-		db.SaveChanges();
+		_context.Remove(new Book { Id = id });
+		_context.SaveChanges();
 		return Ok();
 	}
 }
